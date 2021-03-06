@@ -3,9 +3,8 @@
 ################################################################
 ##
 ##   MySQL Database Backup Script 
-##   Written By:Az
-##   URL: https://tecadmin.net/bash-script-mysql-database-backup/
-##   Last Update: Oct 23, 2020
+##   Written By:Azeez
+##   Last Update: March 5, 2021
 ##
 ################################################################
  
