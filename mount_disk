@@ -1,0 +1,33 @@
+#!/bin/bash
+set -uxo pipefail
+
+MNT_DIR=/mnt/disks/persistent_storage
+
+#disks=("nifi-flowfile-disk" "nifi-content-disk" "nifi-provence-disk" "nifi-database-disk")
+disks=("dev-nifi-data-disk-0" "dev-nifi-data-disk-1" "dev-nifi-data-disk-2"    "dev-nifi-data-disk-3" )
+
+for DISK_NAME in "${disks[@]}"
+do
+    # Check if entry exists in fstab
+
+    MOUNT_DIR=$MNT_DIR/$DISK_NAME
+
+    DEVICE_NAME="/dev/$(basename $(readlink /dev/disk/by-id/google-${DISK_NAME}))"
+
+    echo Device $DEVICE_NAME to Mount $MOUNT_DIR
+
+    sudo mkfs.ext4 -m 0 -F -E lazy_itable_init=0,lazy_journal_init=0,discard $DEVICE_NAME
+    sudo mkdir -p $MOUNT_DIR
+    sudo mount -o discard,defaults $DEVICE_NAME $MOUNT_DIR
+
+    echo UUID=$(sudo blkid -s UUID -o value /dev/dsb) /mnt/disks/persistent_storage/nifi-flowfile-disk ext4 discard,defaults,nofail 0 2 | sudo tee -a /etc/fstab || true
+
+    echo Completed $DEVICE_NAME to $MOUNT_DIR
+done
+
+
+sudo mkdir -p /var/nifi/nifi-current/logs
+sudo mkdir -p /var/nifi/nifi-current/state
+sudo chmod -R 777 /var/nifi/nifi-current/
+sudo chmod -R 777 /mnt/disks/gce-containers-mounts/gce-persistent-disk/
+sudo chmod -R 777 /mnt/disks/persistent_storage
