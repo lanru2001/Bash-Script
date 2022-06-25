@@ -1,0 +1,53 @@
+#!/bin/bash
+        
+set -x
+
+#Formatting the disk
+sudo mkfs.ext4 -m 0 -E lazy_itable_init=0,lazy_journal_init=0,discard /dev/sdb  
+sudo mkfs.ext4 -m 0 -E lazy_itable_init=0,lazy_journal_init=0,discard /dev/sdc
+sudo mkfs.ext4 -m 0 -E lazy_itable_init=0,lazy_journal_init=0,discard /dev/sdd
+sudo mkfs.ext4 -m 0 -E lazy_itable_init=0,lazy_journal_init=0,discard /dev/sde
+
+#Mounting the disk
+sudo mkdir -p  /mnt/disks/persistent_storage/nifi-content-disk
+sudo mkdir -p  /mnt/disks/persistent_storage/nifi-database-disk
+sudo mkdir -p  /mnt/disks/persistent_storage/nifi-flowfile-disk
+sudo mkdir -p  /mnt/disks/persistent_storage/nifi-provenance-disk
+
+sudo mount -o discard,defaults /dev/sdb   /mnt/disks/persistent_storage/nifi-content-disk
+sudo mount -o discard,defaults /dev/sdc   /mnt/disks/persistent_storage/nifi-database-disk
+sudo mount -o discard,defaults /dev/sdd   /mnt/disks/persistent_storage/nifi-flowfile-disk
+sudo mount -o discard,defaults /dev/sde   /mnt/disks/persistent_storage/nifi-provenance-disk
+
+#Configure read and write permissions on the disk
+sudo chmod a+rw  /mnt/disks/persistent_storage/nifi-content-disk
+sudo chmod a+rw  /mnt/disks/persistent_storage/nifi-database-disk
+sudo chmod a+rw  /mnt/disks/persistent_storage/nifi-flowfile-disk
+sudo chmod a+rw  /mnt/disks/persistent_storage/nifi-provenance-disk
+
+#Configuring automatic mounting on VM restart
+
+#Create a backup of your current /etc/fstab file
+sudo cp /etc/fstab    /etc/fstab.backup
+
+#list the UUID for the disk
+sudo blkid /dev/sdb  
+sudo blkid /dev/sdc  
+sudo blkid /dev/sdd  
+sudo blkid /dev/sde  
+
+
+#create an entry that includes all block devices in /etc/fstab
+echo "/dev/sdb  /mnt/disks/persistent_storage/nifi-content-disk  ext4.  discard,defaults,nofail   0  2" >> /etc/fstab
+echo "/dev/sdc  /mnt/disks/persistent_storage/nifi-database-disk ext4.  discard,defaults,nofail   0  2" >> /etc/fstab
+echo "/dev/sdd  /mnt/disks/persistent_storage/nifi-flowfile-disk ext4.  discard,defaults,nofail   0  2" >> /etc/fstab
+echo "/dev/sde  /mnt/disks/persistent_storage/nifi-provenance-disk ext4.  discard,defaults,nofail   0  2" >> /etc/fstab
+
+#verify that your /etc/fstab entries are correct
+cat /etc/fstab
+
+sudo mkdir -p /var/nifi/nifi-current/logs
+sudo mkdir -p /var/nifi/nifi-current/state
+sudo chmod -R 777 /var/nifi/nifi-current/
+sudo chmod -R 777 /mnt/disks/persistent_storage
+sudo chmod -R 777 /var/nifi
