@@ -6,7 +6,7 @@ MNT_DIR=/mnt/disks/persistent_storage
 #disks=("nifi-flowfile-disk" "nifi-content-disk" "nifi-provence-disk" "nifi-database-disk")
 disks=("dev-nifi-data-disk-0" "dev-nifi-data-disk-1" "dev-nifi-data-disk-2"    "dev-nifi-data-disk-3" )
 
-for DISK_NAME in "${disks[@]}"
+for DISK_NAME in "${disks}"
 do
     # Check if entry exists in fstab
 
